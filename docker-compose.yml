@@ -1,0 +1,28 @@
+version: "3.1"
+
+services:
+#postgres
+  pg_db:
+     image: postgres:14
+     restart: unless-stopped
+     environment:
+       - POSTGRES_PASSWORD=secret
+       - POSTGRES_USER=postgres
+       - POSTGRES_DB=stage
+     volumes:
+       - ./postgres:/var/lib/postgresql/data
+     ports:
+       - 127.0.0.1:5432:5432
+  
+  ruller:
+     restart: unless-stopped
+     build:
+        context: ./ruller
+     ports:
+       - 127.0.0.1:9090:9090
+     environment:
+       - DB_URI=host=pg_db port=5432 user=postgres dbname=stage sslmode=disable password=secret
+       - SERVE=:9090
+       
+     depends_on:
+      - pg_db
